@@ -17,7 +17,7 @@ package ucie_rdi_simple_agent_pkg;
 
   class ucie_rdi_simple_driver extends uvm_driver #(ucie_rdi_simple_seq_item);
     `uvm_component_utils(ucie_rdi_simple_driver)
-    virtual svt_ucie_d2d_if rdi_vif;
+    svt_ucie_d2d_vif rdi_vif;
 
     function new(string name, uvm_component parent);
       super.new(name, parent);
@@ -25,7 +25,7 @@ package ucie_rdi_simple_agent_pkg;
 
     function void build_phase(uvm_phase phase);
       super.build_phase(phase);
-      if (!uvm_config_db#(virtual svt_ucie_d2d_if)::get(this, "", "rdi_vif", rdi_vif))
+      if (!uvm_config_db#(svt_ucie_d2d_vif)::get(this, "", "rdi_vif", rdi_vif))
         `uvm_fatal("RDI_SIMPLE_DRV", "Missing rdi_vif")
     endfunction
 

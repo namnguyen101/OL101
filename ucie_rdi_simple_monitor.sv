@@ -1,15 +1,16 @@
-`ifndef UCIE_RDI_SIMPLE_MONITOR_A_SV
-`define UCIE_RDI_SIMPLE_MONITOR_A_SV
+`ifndef UCIE_RDI_SIMPLE_MONITOR_SV
+`define UCIE_RDI_SIMPLE_MONITOR_SV
 
 import uvm_pkg::*;
 `include "uvm_macros.svh"
 import ucie_phy_pkg::*;
 import ucie_rdi_simple_scb_pkg::*;
 
-class ucie_rdi_simple_monitor_a extends uvm_component;
-  `uvm_component_utils(ucie_rdi_simple_monitor_a)
+class ucie_rdi_simple_monitor extends uvm_monitor;
+  `uvm_component_utils(ucie_rdi_simple_monitor)
 
-  virtual svt_ucie_d2d_if rdi_vif;
+  svt_ucie_d2d_vif rdi_vif;
+  ucie_rdi_simple_side_e side = UCIE_RDI_SIMPLE_US;
   uvm_analysis_port #(ucie_rdi_simple_flit) ap;
   bit active_seen;
 
@@ -20,9 +21,9 @@ class ucie_rdi_simple_monitor_a extends uvm_component;
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-    if (!uvm_config_db#(virtual svt_ucie_d2d_if)::get(this, "", "rdi_vif", rdi_vif)) begin
-      `uvm_fatal("RDI_SIMPLE_MON_A", "Missing rdi_vif for monitor A")
-    end
+    if (!uvm_config_db#(svt_ucie_d2d_vif)::get(this, "", "rdi_vif", rdi_vif))
+      `uvm_fatal("RDI_SIMPLE_MON", "Missing rdi_vif")
+    void'(uvm_config_db#(ucie_rdi_simple_side_e)::get(this, "", "side", side));
   endfunction
 
   task run_phase(uvm_phase phase);
@@ -31,9 +32,8 @@ class ucie_rdi_simple_monitor_a extends uvm_component;
       if (rdi_vif.reset) begin
         active_seen = 1'b0;
       end else begin
-        if ((rdi_vif.pl_state_sts == RDI_ACTIVE) && rdi_vif.pl_inband_pres) begin
+        if ((rdi_vif.pl_state_sts == RDI_ACTIVE) && rdi_vif.pl_inband_pres)
           active_seen = 1'b1;
-        end
         sample_tx();
         sample_rx();
       end
@@ -68,7 +68,7 @@ class ucie_rdi_simple_monitor_a extends uvm_component;
   function ucie_rdi_simple_flit make_flit(ucie_rdi_simple_dir_e dir);
     ucie_rdi_simple_flit item;
     item = ucie_rdi_simple_flit::type_id::create("item");
-    item.side = UCIE_RDI_SIMPLE_SIDE_A;
+    item.side = side;
     item.dir = dir;
     item.sample_time = $time;
     item.pl_state_sts = rdi_vif.pl_state_sts;

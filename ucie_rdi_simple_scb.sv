@@ -7,8 +7,8 @@ package ucie_rdi_simple_scb_pkg;
   import ucie_phy_pkg::*;
 
   typedef enum int {
-    UCIE_RDI_SIMPLE_SIDE_A = 0,
-    UCIE_RDI_SIMPLE_SIDE_B = 1
+    UCIE_RDI_SIMPLE_US = 0,
+    UCIE_RDI_SIMPLE_DS = 1
   } ucie_rdi_simple_side_e;
 
   typedef enum int {
@@ -50,62 +50,62 @@ package ucie_rdi_simple_scb_pkg;
     endfunction
   endclass
 
-  `uvm_analysis_imp_decl(_simple_a)
-  `uvm_analysis_imp_decl(_simple_b)
+  `uvm_analysis_imp_decl(_simple_us)
+  `uvm_analysis_imp_decl(_simple_ds)
 
   class ucie_rdi_simple_scb extends uvm_component;
     `uvm_component_utils(ucie_rdi_simple_scb)
 
-    uvm_analysis_imp_simple_a #(ucie_rdi_simple_flit, ucie_rdi_simple_scb) mon_a_export;
-    uvm_analysis_imp_simple_b #(ucie_rdi_simple_flit, ucie_rdi_simple_scb) mon_b_export;
+    uvm_analysis_imp_simple_us #(ucie_rdi_simple_flit, ucie_rdi_simple_scb) us_export;
+    uvm_analysis_imp_simple_ds #(ucie_rdi_simple_flit, ucie_rdi_simple_scb) ds_export;
 
-    ucie_rdi_simple_flit a_to_b_q[$];
-    ucie_rdi_simple_flit b_to_a_q[$];
+    ucie_rdi_simple_flit us_to_ds_q[$];
+    ucie_rdi_simple_flit ds_to_us_q[$];
     int unsigned compare_count;
     int unsigned mismatch_count;
-    int unsigned a_tx_count;
-    int unsigned b_tx_count;
-    int unsigned a_rx_count;
-    int unsigned b_rx_count;
+    int unsigned us_tx_count;
+    int unsigned ds_tx_count;
+    int unsigned us_rx_count;
+    int unsigned ds_rx_count;
 
     function new(string name, uvm_component parent);
       super.new(name, parent);
-      mon_a_export = new("mon_a_export", this);
-      mon_b_export = new("mon_b_export", this);
+      us_export = new("us_export", this);
+      ds_export = new("ds_export", this);
     endfunction
 
-    function void write_simple_a(ucie_rdi_simple_flit item);
+    function void write_simple_us(ucie_rdi_simple_flit item);
       ucie_rdi_simple_flit exp;
 
       if (item.dir == UCIE_RDI_SIMPLE_TX) begin
-        a_tx_count++;
-        a_to_b_q.push_back(item);
+        us_tx_count++;
+        us_to_ds_q.push_back(item);
       end else begin
-        a_rx_count++;
-        if (b_to_a_q.size() == 0) begin
+        us_rx_count++;
+        if (ds_to_us_q.size() == 0) begin
           mismatch_count++;
-          `uvm_error("RDI_SIMPLE_SCB", {"Unexpected A RX: ", item.convert2string()})
+          `uvm_error("RDI_SIMPLE_SCB", {"Unexpected US RX: ", item.convert2string()})
         end else begin
-          exp = b_to_a_q.pop_front();
-          compare_flit("B_TX_TO_A_RX", exp, item);
+          exp = ds_to_us_q.pop_front();
+          compare_flit("DS_TX_TO_US_RX", exp, item);
         end
       end
     endfunction
 
-    function void write_simple_b(ucie_rdi_simple_flit item);
+    function void write_simple_ds(ucie_rdi_simple_flit item);
       ucie_rdi_simple_flit exp;
 
       if (item.dir == UCIE_RDI_SIMPLE_TX) begin
-        b_tx_count++;
-        b_to_a_q.push_back(item);
+        ds_tx_count++;
+        ds_to_us_q.push_back(item);
       end else begin
-        b_rx_count++;
-        if (a_to_b_q.size() == 0) begin
+        ds_rx_count++;
+        if (us_to_ds_q.size() == 0) begin
           mismatch_count++;
-          `uvm_error("RDI_SIMPLE_SCB", {"Unexpected B RX: ", item.convert2string()})
+          `uvm_error("RDI_SIMPLE_SCB", {"Unexpected DS RX: ", item.convert2string()})
         end else begin
-          exp = a_to_b_q.pop_front();
-          compare_flit("A_TX_TO_B_RX", exp, item);
+          exp = us_to_ds_q.pop_front();
+          compare_flit("US_TX_TO_DS_RX", exp, item);
         end
       end
     endfunction
@@ -127,23 +127,23 @@ package ucie_rdi_simple_scb_pkg;
 
     function void check_phase(uvm_phase phase);
       super.check_phase(phase);
-      if (a_to_b_q.size() != 0) begin
-        mismatch_count += a_to_b_q.size();
+      if (us_to_ds_q.size() != 0) begin
+        mismatch_count += us_to_ds_q.size();
         `uvm_error("RDI_SIMPLE_SCB",
-                   $sformatf("%0d A->B expected flits were not received", a_to_b_q.size()))
+                   $sformatf("%0d US->DS expected flits were not received", us_to_ds_q.size()))
       end
-      if (b_to_a_q.size() != 0) begin
-        mismatch_count += b_to_a_q.size();
+      if (ds_to_us_q.size() != 0) begin
+        mismatch_count += ds_to_us_q.size();
         `uvm_error("RDI_SIMPLE_SCB",
-                   $sformatf("%0d B->A expected flits were not received", b_to_a_q.size()))
+                   $sformatf("%0d DS->US expected flits were not received", ds_to_us_q.size()))
       end
     endfunction
 
     function void report_phase(uvm_phase phase);
       super.report_phase(phase);
       `uvm_info("RDI_SIMPLE_SCB",
-                $sformatf("A_TX=%0d B_RX=%0d B_TX=%0d A_RX=%0d compares=%0d mismatches=%0d",
-                          a_tx_count, b_rx_count, b_tx_count, a_rx_count,
+                $sformatf("US_TX=%0d DS_RX=%0d DS_TX=%0d US_RX=%0d compares=%0d mismatches=%0d",
+                          us_tx_count, ds_rx_count, ds_tx_count, us_rx_count,
                           compare_count, mismatch_count),
                 UVM_LOW)
     endfunction

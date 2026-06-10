@@ -31,7 +31,7 @@ package ucie_rdi_simple_test_pkg;
       seq.num_flits = 32;
       seq.start(simple_env.sequencer);
 
-      repeat (80) @(posedge simple_env.rdi_a_vif.lclk);
+      repeat (80) @(posedge simple_env.us_rdi_vif.lclk);
       if (simple_env.scb.compare_count != 32)
         `uvm_fatal("RDI_SIMPLE_COUNT",
                    $sformatf("Expected 32 scoreboard compares, got %0d",
@@ -53,17 +53,17 @@ package ucie_rdi_simple_test_pkg;
     task run_phase(uvm_phase phase);
       phase.raise_objection(this);
 
-      @(posedge simple_env.rdi_a_vif.lclk);
-      simple_env.rdi_a_vif.lp_data <= 256'hdead_beef;
-      simple_env.rdi_a_vif.lp_valid <= 1'b1;
-      simple_env.rdi_a_vif.lp_irdy <= 1'b1;
-      repeat (4) @(posedge simple_env.rdi_a_vif.lclk);
-      simple_env.rdi_a_vif.lp_valid <= 1'b0;
-      simple_env.rdi_a_vif.lp_irdy <= 1'b0;
-      simple_env.rdi_a_vif.lp_data <= '0;
-      repeat (4) @(posedge simple_env.rdi_a_vif.lclk);
+      @(posedge simple_env.us_rdi_vif.lclk);
+      simple_env.us_rdi_vif.lp_data <= 256'hdead_beef;
+      simple_env.us_rdi_vif.lp_valid <= 1'b1;
+      simple_env.us_rdi_vif.lp_irdy <= 1'b1;
+      repeat (4) @(posedge simple_env.us_rdi_vif.lclk);
+      simple_env.us_rdi_vif.lp_valid <= 1'b0;
+      simple_env.us_rdi_vif.lp_irdy <= 1'b0;
+      simple_env.us_rdi_vif.lp_data <= '0;
+      repeat (4) @(posedge simple_env.us_rdi_vif.lclk);
 
-      if (simple_env.scb.a_tx_count != 0 || simple_env.scb.b_rx_count != 0)
+      if (simple_env.scb.us_tx_count != 0 || simple_env.scb.ds_rx_count != 0)
         `uvm_fatal("RDI_PRE_ACTIVE", "Simple monitors captured traffic before ACTIVE")
 
       phase.drop_objection(this);
