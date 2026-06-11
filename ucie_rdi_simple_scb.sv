@@ -4,7 +4,7 @@
 package ucie_rdi_simple_scb_pkg;
   import uvm_pkg::*;
   `include "uvm_macros.svh"
-  import ucie_phy_pkg::*;
+  localparam bit [3:0] UCIE_RDI_SIMPLE_ACTIVE_VALUE = 4'h1;
 
   typedef enum int {
     UCIE_RDI_SIMPLE_US = 0,
@@ -20,7 +20,7 @@ package ucie_rdi_simple_scb_pkg;
     ucie_rdi_simple_side_e side;
     ucie_rdi_simple_dir_e  dir;
     time                   sample_time;
-    ucie_rdi_state_e       pl_state_sts;
+    bit [3:0]              pl_state_sts;
     bit [2:0]              pl_link_cfg;
     bit [2:0]              pl_speed_mode;
     bit [255:0]            data;
@@ -31,7 +31,7 @@ package ucie_rdi_simple_scb_pkg;
     `uvm_object_utils_begin(ucie_rdi_simple_flit)
       `uvm_field_enum(ucie_rdi_simple_side_e, side, UVM_DEFAULT)
       `uvm_field_enum(ucie_rdi_simple_dir_e, dir, UVM_DEFAULT)
-      `uvm_field_enum(ucie_rdi_state_e, pl_state_sts, UVM_DEFAULT)
+      `uvm_field_int(pl_state_sts, UVM_DEFAULT)
       `uvm_field_int(pl_link_cfg, UVM_DEFAULT)
       `uvm_field_int(pl_speed_mode, UVM_DEFAULT)
       `uvm_field_int(data, UVM_DEFAULT)
@@ -53,7 +53,7 @@ package ucie_rdi_simple_scb_pkg;
   `uvm_analysis_imp_decl(_simple_us)
   `uvm_analysis_imp_decl(_simple_ds)
 
-  class ucie_rdi_simple_scb extends uvm_component;
+  class ucie_rdi_simple_scb extends uvm_scoreboard;
     `uvm_component_utils(ucie_rdi_simple_scb)
 
     uvm_analysis_imp_simple_us #(ucie_rdi_simple_flit, ucie_rdi_simple_scb) us_export;

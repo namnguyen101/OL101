@@ -4,7 +4,7 @@
 package ucie_rdi_simple_agent_pkg;
   import uvm_pkg::*;
   `include "uvm_macros.svh"
-  import ucie_phy_pkg::*;
+  import ucie_rdi_simple_scb_pkg::*;
   import ucie_rdi_simple_item_pkg::*;
 
   class ucie_rdi_simple_sequencer extends uvm_sequencer #(ucie_rdi_simple_seq_item);
@@ -39,7 +39,7 @@ package ucie_rdi_simple_agent_pkg;
 
     task drive_item(ucie_rdi_simple_seq_item item);
       wait (!rdi_vif.reset);
-      while (!((rdi_vif.pl_state_sts == RDI_ACTIVE) && rdi_vif.pl_inband_pres)) begin
+      while (!((rdi_vif.pl_state_sts == UCIE_RDI_SIMPLE_ACTIVE_VALUE) && rdi_vif.pl_inband_pres)) begin
         @(posedge rdi_vif.lclk);
       end
 

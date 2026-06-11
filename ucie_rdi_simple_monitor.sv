@@ -3,7 +3,6 @@
 
 import uvm_pkg::*;
 `include "uvm_macros.svh"
-import ucie_phy_pkg::*;
 import ucie_rdi_simple_scb_pkg::*;
 
 class ucie_rdi_simple_monitor extends uvm_monitor;
@@ -32,7 +31,7 @@ class ucie_rdi_simple_monitor extends uvm_monitor;
       if (rdi_vif.reset) begin
         active_seen = 1'b0;
       end else begin
-        if ((rdi_vif.pl_state_sts == RDI_ACTIVE) && rdi_vif.pl_inband_pres)
+        if ((rdi_vif.pl_state_sts == UCIE_RDI_SIMPLE_ACTIVE_VALUE) && rdi_vif.pl_inband_pres)
           active_seen = 1'b1;
         sample_tx();
         sample_rx();
@@ -42,7 +41,7 @@ class ucie_rdi_simple_monitor extends uvm_monitor;
 
   task sample_tx();
     ucie_rdi_simple_flit item;
-    if (active_seen && (rdi_vif.pl_state_sts == RDI_ACTIVE) &&
+    if (active_seen && (rdi_vif.pl_state_sts == UCIE_RDI_SIMPLE_ACTIVE_VALUE) &&
         rdi_vif.lp_valid && rdi_vif.lp_irdy && rdi_vif.pl_trdy) begin
       item = make_flit(UCIE_RDI_SIMPLE_TX);
       item.data = rdi_vif.lp_data;
@@ -55,7 +54,7 @@ class ucie_rdi_simple_monitor extends uvm_monitor;
 
   task sample_rx();
     ucie_rdi_simple_flit item;
-    if (active_seen && (rdi_vif.pl_state_sts == RDI_ACTIVE) && rdi_vif.pl_valid) begin
+    if (active_seen && (rdi_vif.pl_state_sts == UCIE_RDI_SIMPLE_ACTIVE_VALUE) && rdi_vif.pl_valid) begin
       item = make_flit(UCIE_RDI_SIMPLE_RX);
       item.data = rdi_vif.pl_data;
       item.user = 16'h0;
