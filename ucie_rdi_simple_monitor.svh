@@ -75,7 +75,6 @@ class ucie_rdi_simple_monitor extends uvm_monitor;
       end
 
       sample_mainband();
-      sample_dllp();
     end
   endtask
 
@@ -90,7 +89,6 @@ class ucie_rdi_simple_monitor extends uvm_monitor;
     if (rdi_vif.lp_valid && rdi_vif.lp_irdy && rdi_vif.pl_trdy) begin
       item = make_item(UCIE_RDI_SIMPLE_MAINBAND_TX);
       item.data = rdi_vif.lp_data;
-      item.stream = rdi_vif.lp_stream;
       ap.write(item);
       log_item(item);
     end
@@ -98,27 +96,6 @@ class ucie_rdi_simple_monitor extends uvm_monitor;
     if (rdi_vif.pl_valid) begin
       item = make_item(UCIE_RDI_SIMPLE_MAINBAND_RX);
       item.data = rdi_vif.pl_data;
-      item.stream = rdi_vif.pl_stream;
-      ap.write(item);
-      log_item(item);
-    end
-  endtask
-
-  task sample_dllp();
-    ucie_rdi_simple_item item;
-
-    if (rdi_vif.lp_dllp_valid) begin
-      item = make_item(UCIE_RDI_SIMPLE_DLLP_TX);
-      item.dllp = rdi_vif.lp_dllp;
-      item.dllp_ofc = rdi_vif.lp_dllp_ofc;
-      ap.write(item);
-      log_item(item);
-    end
-
-    if (rdi_vif.pl_dllp_valid) begin
-      item = make_item(UCIE_RDI_SIMPLE_DLLP_RX);
-      item.dllp = rdi_vif.pl_dllp;
-      item.dllp_ofc = rdi_vif.pl_dllp_ofc;
       ap.write(item);
       log_item(item);
     end
@@ -132,15 +109,6 @@ class ucie_rdi_simple_monitor extends uvm_monitor;
     item.kind = kind;
     item.sample_time = $time;
 
-    item.pl_protocol = rdi_vif.pl_protocol;
-    item.pl_protocol_flitfmt = rdi_vif.pl_protocol_flitfmt;
-    item.pl_protocol_vld = rdi_vif.pl_protocol_vld;
-    item.pl_speed_mode = rdi_vif.pl_speed_mode;
-    item.pl_link_cfg = rdi_vif.pl_link_cfg;
-    item.lp_nop_flit = rdi_vif.lp_nop_flit;
-    item.lp_corrupt_crc = rdi_vif.lp_corrupt_crc;
-    item.pl_flit_cancel = rdi_vif.pl_flit_cancel;
-    item.lp_state_req = rdi_vif.lp_state_req;
     item.pl_state_sts = rdi_vif.pl_state_sts;
     item.pl_inband_pres = rdi_vif.pl_inband_pres;
 
