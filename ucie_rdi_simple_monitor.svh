@@ -26,9 +26,6 @@ class ucie_rdi_simple_monitor extends uvm_monitor;
 
     super.build_phase(phase);
 
-    if (!uvm_config_db#(svt_ucie_d2d_vif)::get(this, "", "rdi_vif", rdi_vif))
-      `uvm_fatal("RDI_SIMPLE_MON", "rdi_vif must be set for ucie_rdi_simple_monitor")
-
     if (!uvm_config_db#(ucie_rdi_simple_side_e)::get(this, "", "side", side)) begin
       if (uvm_config_db#(string)::get(this, "", "side_name", side_name)) begin
         if (side_name == "US")
@@ -39,6 +36,20 @@ class ucie_rdi_simple_monitor extends uvm_monitor;
           `uvm_fatal("RDI_SIMPLE_MON", $sformatf("Unsupported side_name '%s'", side_name))
       end else begin
         `uvm_fatal("RDI_SIMPLE_MON", "side must be set to UCIE_RDI_SIMPLE_US or UCIE_RDI_SIMPLE_DS")
+      end
+    end
+
+    if (!uvm_config_db#(svt_ucie_d2d_vif)::get(this, "", "rdi_vif", rdi_vif)) begin
+      if (side == UCIE_RDI_SIMPLE_US) begin
+        if (!uvm_config_db#(svt_ucie_d2d_vif)::get(this, "", "ucie_us_rdi_vif", rdi_vif) &&
+            !uvm_config_db#(svt_ucie_d2d_vif)::get(null, "uvm_test_top.ucie_env", "ucie_us_rdi_vif", rdi_vif)) begin
+          `uvm_fatal("RDI_SIMPLE_MON", "US monitor cannot get rdi_vif or ucie_us_rdi_vif")
+        end
+      end else begin
+        if (!uvm_config_db#(svt_ucie_d2d_vif)::get(this, "", "ucie_ds_rdi_vif", rdi_vif) &&
+            !uvm_config_db#(svt_ucie_d2d_vif)::get(null, "uvm_test_top.ucie_env", "ucie_ds_rdi_vif", rdi_vif)) begin
+          `uvm_fatal("RDI_SIMPLE_MON", "DS monitor cannot get rdi_vif or ucie_ds_rdi_vif")
+        end
       end
     end
 
