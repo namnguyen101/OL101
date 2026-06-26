@@ -230,7 +230,7 @@ class ucie_rdi_simple_monitor extends uvm_monitor;
       tx_sample_count++;
       ap.write(item);
       log_item(item);
-      log_sample("TX", tx_sample_count, item);
+      log_sample("TX", "lp_data", tx_sample_count, item);
     end
 
     if (rdi_vif.pl_valid) begin
@@ -239,7 +239,7 @@ class ucie_rdi_simple_monitor extends uvm_monitor;
       rx_sample_count++;
       ap.write(item);
       log_item(item);
-      log_sample("RX", rx_sample_count, item);
+      log_sample("RX", "pl_data", rx_sample_count, item);
     end
   endtask
 
@@ -523,13 +523,15 @@ class ucie_rdi_simple_monitor extends uvm_monitor;
     end
   endfunction
 
-  function void log_sample(string direction, int unsigned sample_index, ucie_rdi_simple_item item);
+  function void log_sample(string direction, string signal_name,
+                           int unsigned sample_index, ucie_rdi_simple_item item);
     if (log_sample_values) begin
       `uvm_info("RDI_SIMPLE_MON_SAMPLE",
-                $sformatf("side=%s dir=%s sample_index=%0d time=%0t state=0x%0h inband=%0b data=0x%0h",
-                          side_to_string(), direction, sample_index,
-                          item.sample_time, item.pl_state_sts,
-                          item.pl_inband_pres, item.data),
+                $sformatf("side=%s dir=%s signal=%s sample_index=%0d time=%0t state=0x%0h inband=%0b %s=0x%0h data=0x%0h",
+                          side_to_string(), direction, signal_name,
+                          sample_index, item.sample_time, item.pl_state_sts,
+                          item.pl_inband_pres, signal_name, item.data,
+                          item.data),
                 UVM_LOW)
     end
   endfunction
